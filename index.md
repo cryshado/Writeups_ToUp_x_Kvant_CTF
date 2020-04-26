@@ -97,6 +97,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Видим флаг - `<flag_ctf:(?-You1or0-?)>`
 
 
+
 ### somecode (ppc | crypto)
 
 (описание)
@@ -261,3 +262,74 @@ int main()
 }
 ```
 В итоге получаем флаг : `<flag_ctf:(dkFW8efklf232kulbAADWd1sl1MkoaSA)>`
+
+
+### ManyLines (ppc) 
+
+Если мы подключимся к серверу то получим:
+```
+Hey try this :) # MTI1MOODlOOCteOBruatuw==
+RzFKTDhKelBpSGFYVzczckttWWt5TWhQZ2ZyRDBtVFhCQTVGdHFVcDdpcHhpZElrSFAxMVdTWmdzb2RrcHRmaUVoa0ZBVjFwTWZHQ1pT
+NVp6RnRySGJmT0dDVzBUS1BEQks3NnRJb29DTVA=
+```
+
+`Hey try this :) # MTI1MOODlOOCteOBruatuw==` 
+
+Всегда будет одинаковым, а вот строки дальше могут отличаться, `MTI1MOODlOOCteOBruatuw==` 
+это подсказка к тому, что в таске будут числа Фибоначчи. Если мы расшифруем строку в base64
+то получим `1250ピサの死`, видим, что это японский. Переведём например на английский и получим 
+`Death of 1250 Pisa`, гуглим, нагугливаем что-то про дату и место смерти Фибоначчи. 
+
+Далее видим строку. Например:
+```
+RzFKTDhKelBpSGFYVzczckttWWt5TWhQZ2ZyRDBtVFhCQTVGdHFVcDdpcHhpZElrSFAxMVdTWmdzb2RrcHRmaUVoa0ZBVjFwTWZHQ1pT
+NVp6RnRySGJmT0dDVzBUS1BEQks3NnRJb29DTVA=
+```
+И возможность что-то отправить в ответ. Расшифруем строку в base64 и шифром Цезаря(до шифра Цезаря нужно было догодаться, но организаторы давали hint) первый раз со сдвигом 0 и в последующих итерациях следуя последовательности числе фибаначи 
+менять сдвиг. Если сервер принял ответ то мы получим новую строку. Нужно написать
+код который будет быстро отправлять такие строки, так как у сервера тайм-аут 
+в 5 секунд. 
+
+Вот код, который я написал:
+```python3
+# -*- coding: utf-8 -*-
+from pwn import *
+import base64
+from caesarcipher import CaesarCipher
+
+host = '212.26.237.212'
+port = 4444
+
+def fibonacci():
+	a, b = 0, 1
+	while True:
+		yield a
+		a, b = b, a + b
+
+nc = remote(host, port)
+
+hint = nc.recvline()
+print(hint)
+
+for n in fibonacci():
+	read = nc.recvline().decode().replace('Hey try this :) # ', '')
+
+	print(f'Received: {read}')
+
+	try:
+		base64_decode = base64.b64decode(read.encode("UTF-8"))
+	except base64.binascii.Error:
+		break
+
+	to_send = CaesarCipher(base64_decode.decode('utf-8'), offset=n).decoded
+
+	print(f'Sent: {to_send}')
+	print('----------')
+
+	nc.sendline(to_send.encode())
+```
+
+Сервер может зопросить рандомное n колв итераций в разумных рамках(в среднем около 1000). После выполнения
+если всё было успешно мы получим:
+`Well done! Your flag is <flag_ctf:(ef23UQTE42daiojjdQD#D&FT@)>`
+
