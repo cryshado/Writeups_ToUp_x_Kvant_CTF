@@ -2,6 +2,14 @@
 
 ### fsociety (ppc | crypto | forensic)
 
+Описание:
+```
+How do I take off a mask when it stops being a mask, when it's as much a part of me as I am?
+
+HINT (26.04.2020 18:47):
+Use the name task and remember that Sergey Brin loves google maps!
+```
+
 Мы видим файл `fsociety.dat.crp` - это зашифрованный файл алгоритмом `AES256`. 
 
 Гуглим название таска.
@@ -100,9 +108,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ### somecode (ppc | crypto)
 
-(описание)
+Описание:
 ```
-When Russian Hacker Vasiliy drinking Vodka and playing the balalaika he decided to learn programming, but he can't choose what language he wont to learn. He started watching 5 lessons about different programming languages. After he wrote first program — "Hello World", he started writing encryption code to encrypt servers in all countries of the world. He developed the code, but unfortunately couldn't run it.
+When Russian Hacker Vasiliy drinking Vodka and playing the balalaika he decided to learn programming, but he can't choose what language he wont to learn. 
+He started watching 5 lessons about different programming languages. 
+After he wrote first program — "Hello World", he started writing encryption code to encrypt servers in all countries of the world. 
+He developed the code, but unfortunately couldn't run it.
 Let's help Our Sweet CoolHacker!
 ```
 
@@ -332,4 +343,51 @@ for n in fibonacci():
 Сервер может зопросить рандомное n колв итераций в разумных рамках(в среднем около 1000). После выполнения
 если всё было успешно мы получим:
 `Well done! Your flag is <flag_ctf:(ef23UQTE42daiojjdQD#D&FT@)>`
+
+
+
+### tryit (crypto) 
+
+Описание:
+```
+Try it ...
+
+HINT (26.04.2020 16:53):
+[rɛindaːl], but 0 is lower, 1 is higher
+```
+
+1. Видим файл расширения tryit.flag - открыв его через текстовый редактр видим что-то похожее на код картинки. Меняем расширение на png/jpg или подобное. Видим битую картинку.
+
+![tryit_1](img/tryit/tryit_1.jpg)
+
+2. Открываем картинку через Notepad++
+
+3. Находим:
+`0 0 1 1 0 0 0 0 0 0 1 1 1 0 0 1 1 1 1 1 0 0 0 0 0 1 1 1 1 0 0 0 1 1 1 0 0 1 1 0 0 1 0 1 0 1 0 0 0 1 1 1 1 0 0 0 0 1 0 0 1 1 0 0`
+`(WVVWd09GVkhkRUZtYmxFdlVXMTBNbUpzY0VWbVJGSlRUVzEwTmxSWGR6Rmxha0V5VWpKM2VWSldRVDA9)`
+`God loves a Trinity...`
+
+4. Копируем куда-то себе это всё и удаляем в самом файле, сохраняем и видим, что картиночка более менее восстановилась.
+
+![tryit_1](img/tryit/tryit_2.jpg)
+
+5. Переписываем всё с картинки, получаем:
+`R/EARME551HCHNBJTEDEW93MVWKMTDV3EQGR2KE6IHQX1MWSPFIAUKZMYJJEFGCC`
+
+Из подсказки `but 0 is lower, 1 is higher` понимаем, что 0 это нижний регистр, а 1 верхний. 
+Совмещаем, получаем:
+`r/EArme551HCHnbJTEDEw93mvWKMTdv3EQGr2KE6iHqX1MwspFIAUkzmyJjeFGcc`
+Смотрим, думаем что это, АГА AES-256!!!
+
+так...
+
+`(WVVWd09GVkhkRUZtYmxFdlVXMTBNbUpzY0VWbVJGSlRUVzEwTmxSWGR6Rmxha0V5VWpKM2VWSldRVDA9)` ранее мы нашли, убираем `(` и `)`.
+
+АГА! Да это же `base64`, смотрим на подсказку в конце файла, которую мы нашли ранее `God loves a Trinity...`, троицу, троицу... АГА! Значит это защифрованный "тремя слоями" base64! Дешифруем...
+
+Получаем `hJ|Pk@~t?BkvnZD|4R2kzMl5z06Gl2EP`, да это же 1000% ключ от AES'a :)
+
+*magic*
+
+...и получаем флаг "<flag_rznctf:(neugVBguioeghigbnRWORG)>".
 
